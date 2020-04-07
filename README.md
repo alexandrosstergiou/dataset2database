@@ -129,5 +129,5 @@ Installation through pip
 
 The latest stable release is also available for download through pip
 ```
-$ pip install dataset2databse
+$ pip install dataset2database
 ```
