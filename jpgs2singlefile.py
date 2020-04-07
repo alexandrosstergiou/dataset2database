@@ -8,10 +8,11 @@ import subprocess
 import time
 import multiprocessing
 import signal
+import logging
 from concurrent.futures import ProcessPoolExecutor as Pool
 
 def file2sql(video_i):
-    print('-> processing {}'.format(video_i))
+    logging.info('dataset2database:: -> processing {}'.format(video_i))
     filename_db = os.path.join(video_i,'frames.db')
     con = sqlite3.connect(filename_db, timeout=0.1)
     cur = con.cursor()
@@ -40,7 +41,7 @@ def file2sql(video_i):
 
 def worker(file_i):
     # Print informational message
-    print('process #{} is converting file: {}'.format(multiprocessing.current_process().name,file_i))
+    logging.info('dataset2database:: process #{} is converting file: {}'.format(multiprocessing.current_process().name,file_i))
     sys.stdout.flush()
 
     # Only consider videos
@@ -60,7 +61,7 @@ def worker(file_i):
             # Case that frames have already been extracted
             if not os.path.exists(os.path.join(dst_directory_path, 'frame_00001.jpg')):
                 subprocess.call('rm -r {}'.format(dst_directory_path), shell=True)
-                print('remove {}'.format(dst_directory_path))
+                logging.info('dataset2database:: remove {}'.format(dst_directory_path))
                 os.makedirs(dst_directory_path)
             else:
                 return
@@ -69,8 +70,7 @@ def worker(file_i):
             filename_db = os.path.join(dst_directory_path,'frames.db')
             create_db(filename_db)
     except:
-        print('Exception')
-        print(dst_directory_path)
+        logging.info('dataset2database:: Exception in {}'.format(dst_directory_path))
         return
 
 
@@ -95,18 +95,14 @@ def create_db(filename):
     db.close()
 
 
-
-if __name__ == '__main__':
+def convert(base_dir,dst_dir):
 
     start = time.time()
-    #SQLITE
-    base_dir = 'HACS/'
-    dst_dir = 'HACS_videos/jpg'
 
     #--- Extract files from folder following pattern
     files   = glob.glob(base_dir+"*/*.mp4")
     n_files = len(files)
-    print('Number of files in folder: ', n_files)
+    logging.info('dataset2database:: Number of files in folder: ', n_files)
 
 
     for c in os.listdir(base_dir):
@@ -118,7 +114,7 @@ if __name__ == '__main__':
                 p1.map(worker, base_files)
 
         except KeyboardInterrupt:
-            print ("Caught KeyboardInterrupt, terminating")
+            logging.warning("dataset2database:: Caught KeyboardInterrupt, terminating")
             p1.terminate()
             p1.join()
 
@@ -129,10 +125,10 @@ if __name__ == '__main__':
                 p2.map(file2sql, dist_files)
 
         except KeyboardInterrupt:
-            print ("Caught KeyboardInterrupt, terminating")
+            logging.warming("dataset2database:: Caught KeyboardInterrupt, terminating")
             p2.terminate()
             p2.join()
 
 
     end = time.time()
-    print('Conversion to SQLite database was sucessful in %d secs' %(end-start))
+    logging.info('dataset2database:: Conversion to SQLite database was sucessful in %d secs' %(end-start))
