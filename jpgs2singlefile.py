@@ -39,17 +39,17 @@ def file2sql(video_i):
     con.close()
 
 
-def worker(file_i):
+def worker(file_i,dst_dir):
     # Print informational message
     logging.info('dataset2database:: process #{} is converting file: {}'.format(multiprocessing.current_process().name,file_i))
-    sys.stdout.flush()
 
     # Only consider videos
     if '.mp4' not in file_i:
-      return
+        return
 
     # Get file without .mp4 extension
     name, ext = os.path.splitext(file_i)
+
     name = os.path.join(*(name.split(os.path.sep)[1:]))
 
     # Create destination directory for video
@@ -96,7 +96,6 @@ def create_db(filename):
 
 
 def convert(base_dir,dst_dir):
-
     start = time.time()
 
     #--- Extract files from folder following pattern
@@ -109,9 +108,10 @@ def convert(base_dir,dst_dir):
 
         # --- FRAME EXTRACTION IS DONE HERE
         base_files = glob.glob(os.path.join(base_dir,c)+"/*.mp4")
+        dst_dirs = [dst_dir for _ in range(len(base_files))]
         try:
             with Pool() as p1:
-                p1.map(worker, base_files)
+                p1.map(worker, base_files, dst_dirs)
 
         except KeyboardInterrupt:
             logging.warning("dataset2database:: Caught KeyboardInterrupt, terminating")
@@ -125,7 +125,7 @@ def convert(base_dir,dst_dir):
                 p2.map(file2sql, dist_files)
 
         except KeyboardInterrupt:
-            logging.warming("dataset2database:: Caught KeyboardInterrupt, terminating")
+            logging.warning("dataset2database:: Caught KeyboardInterrupt, terminating")
             p2.terminate()
             p2.join()
 
