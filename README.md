@@ -6,7 +6,9 @@
 About
 ----------------------
 
-The package is made as a solution when using video inputs in Machine Learning models. As extracting and storing frames in `.JPEG` files will quickly increase the memory requirements and more importantly the number of `inodes`, the package provides a convenient alternative. Video frames are stored as blobs at database file `.db` which can be read as quickly as the `.JPEG` files but without the additional large memory requirements.
+The package is made as a solution when using video inputs in Machine Learning models. As extracting and storing frames in `.JPEG`/`.PNG` files will quickly increase the memory requirements and more importantly the number of `inodes`, the package provides a convenient alternative. Video frames are stored as blobs at database file `.db` which can be read as quickly as the `.JPEG` files but without the additional large memory requirements.
+
+Currently supported video formats include `.mp4`,`mpeg-4`,`.avi`,`.wmv`. If you have a different extension, you can simply change the script to include them (in the `dataset2database/jpgs2singlefile.py`)
 
 ----------------------
 Package requirements
@@ -55,6 +57,7 @@ from jpgs2singlefile import convert
 convert(my_dataset_dir, my_target_dir)
 
 ```
+**! Please not that you need to use a "/" for Unix-based systems or a "//" for Windows-based systems alongside your `my_dataset_dir`.**
 
 ----------------------
 Frames.db files
@@ -120,8 +123,11 @@ Please make sure, Git is installed in your machine:
 $ sudo apt-get update
 $ sudo apt-get install git
 $ git clone https://github.com/alexandrosstergiou/dataset2database.git
+$ cd dataset2database
+$ pip install .
 ```
 
+You can then use it as any other package installed through pip.
 
 -------------------------
 Installation through pip
