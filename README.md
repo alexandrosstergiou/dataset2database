@@ -13,7 +13,7 @@ Currently supported video formats include `.mp4`,`mpeg-4`,`.avi`,`.wmv`. If you 
 ----------------------
 Package requirements
 ----------------------
-The two required packages are `opencv` for image/frame loading and `numpy` for array manipulation. Make sure that both are installed before running any functions.
+The three required packages are `opencv` for image/frame loading, `numpy` for array manipulation and `tqdm` for verbose. Make sure that all packages installed before running any functions.
 
 **Multiprocessing:** The code uses multiprocessing for improving speeds, thus the total time required for the conversion varies across different processors. The code has been tested on an AMD Threadripper 2950X with an average conversion time of 48 minutes for ~500K videos.
 
