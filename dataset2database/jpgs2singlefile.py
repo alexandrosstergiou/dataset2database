@@ -11,7 +11,8 @@ import subprocess
 import time
 import multiprocessing
 import logging
-from concurrent.futures import ProcessPoolExecutor as Pool
+from multiprocessing import Pool
+import tqdm
 
 
 '''
@@ -165,7 +166,7 @@ def create_db(filename):
     [Returns]
         - None
 '''
-def convert(base_dir,dst_dir,verbose_lvl=2):
+def convert(base_dir,dst_dir,verbose_lvl=1):
     start = time.time()
 
     global v_lvl
@@ -181,19 +182,20 @@ def convert(base_dir,dst_dir,verbose_lvl=2):
         print('dataset2database:: Number of files in folder: ', n_files)
 
 
-    for c in os.listdir(base_dir):
+    for idx,c in enumerate(os.listdir(base_dir)):
 
         # --- FRAME EXTRACTION IS DONE HERE
         base_files = glob.glob(os.path.join(base_dir,c)+"/*.mp4")+\
                      glob.glob(os.path.join(base_dir,c)+"/*.mpeg-4")+\
                      glob.glob(os.path.join(base_dir,c)+"/*.avi")+\
                      glob.glob(os.path.join(base_dir,c)+"/*.wmv")
-        if (verbose_lvl>=2):
-            print('dataset2database:: Converting {} with {} files'.format(c,len(base_files)))
+        if (verbose_lvl>=1):
+            print('dataset2database:: [{}/{}] Converting {} with {} files'.format(idx, len(os.listdir(base_dir)), c,len(base_files)))
         tmp = [[dst_dir,f] for f in base_files]
         try:
             with Pool() as p1:
-                p1.map(worker, tmp)
+                for _ in tqdm.tqdm(p1.imap_unordered(worker, tmp), total=len(tmp)):
+                    pass
 
         except KeyboardInterrupt:
             if (verbose_lvl>=1):
@@ -205,7 +207,8 @@ def convert(base_dir,dst_dir,verbose_lvl=2):
         dist_files = glob.glob(os.path.join(dst_dir,c)+"/*")
         try:
             with Pool() as p2:
-                p2.map(file2sql, dist_files)
+                for _ in tqdm.tqdm(p2.imap_unordered(file2sql, dist_files), total=len(dist_files)):
+                    pass
 
         except KeyboardInterrupt:
             if (verbose_lvl>=1):
